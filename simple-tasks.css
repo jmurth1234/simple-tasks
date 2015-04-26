@@ -1,0 +1,92 @@
+/* CSS declarations go here */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 100% !important;
+    }
+
+    .brand-logo {
+        position: relative !important;
+        font-weight: bold !important;
+    }
+
+    nav .brand-logo {
+        left: 0% !important;
+        -webkit-transform: translateX(0%) !important;
+        -moz-transform: translateX(0%) !important;
+        -ms-transform: translateX(0%) !important;
+        -o-transform: translateX(0%) !important;
+        transform: translateX(0%) !important;
+    }
+
+
+    nav .container {
+        padding: 0px !important;
+    }
+
+    .modal {
+        bottom: 0 !important;
+        top: 0% !important;
+        margin: 0;
+        width: 100%;
+        height: 250px !important;
+        border-radius: 0;
+        will-change: bottom, opacity;
+    }
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 1280px) {
+    .container {
+        width: 100% !important;
+    }
+}
+
+html, body {
+    overflow: hidden;
+}
+
+.dropdown-content {
+    width: 200px;
+    margin-top: 5px;
+}
+
+.modal-content {
+    max-width: 480px;
+}
+
+.checked {
+    text-decoration: line-through;
+}
+
+.item {
+    color: #000;
+}
+
+.hamburger {
+    padding-right: 10px;
+    font-size: 90% !important;
+}
+
+.brand-logo {
+    font-size: 110% !important;
+    font-weight: bold !important;
+}
+
+header, main, footer {
+    padding-left: 240px;
+}
+
+
+@media only screen and (max-width : 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+}
+
+main {
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+

@@ -1,0 +1,129 @@
+<head>
+    <title>Learning Meteor by means of easy tutorial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+</head>
+
+<body>
+<header>
+    <nav class="light-blue" role="navigation">
+        <div class="nav-wrapper container">
+            <a id="logo-container" href="#" class="brand-logo">Simple Tasks</a>
+
+            <ul class="left hamburger">
+                <li><a href="#" class="categories hide-on-large-only" data-activates="mobile-demo"><i
+                        class="mdi-navigation-menu"></i></a></li>
+            </ul>
+
+            <ul class="right">
+                {{#if currentUser}}
+                    <li><a id="logout" href="#!">Logout</a></li>
+                {{else}}
+                    <li><a class="modal-trigger" href="#login-modal">Login</a></li>
+                {{/if}}
+                <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i
+                        class="mdi-navigation-more-vert"></i></a></li>
+            </ul>
+
+
+            <ul class="dropdown-content" id="dropdown1" >
+                <li><a class="black-text" href="#!">Settings</a></li>
+                <li     class="divider"></li>
+                <li><a class="black-text" href="#!">About</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<!-- Modal Structure -->
+<div id="login-modal" class="modal" >
+    {{> login}}
+</div>
+
+
+<div class="side-nav fixed" id="mobile-demo" style="  min-height: 100%;">
+    <div class="sidebar">
+        <ul>
+            <li><a href="">All Tasks</a></li>
+            <li><a href="">Unsorted</a></li>
+            <li><a href="">Placeholder</a></li>
+            <li><a href="">Another Placeholder</a></li>
+        </ul>
+    </div>
+
+</div>
+
+<main>
+    <div class="container main">
+        {{#if currentUser}}
+            <div class="section">
+                <div class="row">
+                    <div class="col s12">
+                        {{> task_input}}
+                    </div>
+                    <div class="col s6"> Tasks to complete: {{incompleteCount}}
+                    </div>
+                    <div class="col s6">
+                        <input type="checkbox" checked="{{hideCompleted}}" id="hideCompleted"/>
+                        <label class="item" for="hideCompleted">Hide Completed</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tasks">
+                {{#each tasks}}
+                    {{> task}}
+                {{/each}}
+            </div>
+
+        {{else}}
+            <div class="section center-align">
+                <h2>Welcome to Simple Tasks</h2>
+
+                <p class="flow-text">Please login or sign up in order to start using this application!</p>
+
+                <a class="flow-text modal-trigger blue btn" href="#login-modal">Login</a>
+            </div>
+        {{/if}}
+    </div>
+</main>
+</body>
+
+<template name="task">
+    <div class="divider"></div>
+    <div class="section">
+        <div class="row">
+            <div class="col s11">
+                <input type="checkbox" checked="{{checked}}" id="{{_id}}" class="toggle-checked"/>
+                <label class="item {{#if checked}}checked{{/if}}" for="{{_id}}">{{text}}</label>
+            </div>
+
+            <div class="col s1">
+                <a href="#"><i class="mdi-navigation-close right delete"></i></a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template name="login">
+    <div class="modal-content center-block">
+        <div class="input-field">
+            <input id="username" type="text" class="validate">
+            <label for="username">Username</label>
+        </div>
+        <div class="input-field">
+            <input id="password" type="password" class="validate">
+            <label for="password">Password</label>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#!" id="login" class=" modal-action modal-close waves-effect waves blue btn">Login</a>
+            <a href="#!" id="signup" class=" modal-action modal-close waves-effect waves blue-text btn-flat">Sign Up</a>
+        </div>
+    </div>
+</template>
+
+<template name="task_input">
+    <form class="new-task">
+        <input class="task-input" type="text" name="text" placeholder="Type to add new tasks"/>
+    </form>
+</template>
