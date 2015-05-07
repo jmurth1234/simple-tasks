@@ -13,7 +13,6 @@ if (Meteor.isClient) {
         if (!tags) {
             tags = Tags.find({}, {sort: {createdAt: 1}});
         }
-        console.log(tags);
         return tags;
     }
 
@@ -56,7 +55,6 @@ if (Meteor.isClient) {
     });
 
     Template.body.onRendered(function () {
-        console.log("Document ready!");
         $(".categories").sideNav();
         $('.modal-trigger').leanModal();
         $('.dropdown-button').dropdown({

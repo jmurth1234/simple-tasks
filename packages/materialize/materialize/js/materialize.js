@@ -4052,7 +4052,6 @@ jQuery.fn.extend({
 
 
     $.fn.sideNav = function (methodOrOptions) {
-        console.log("Enabling sidenav on " + this);
         if (methods[methodOrOptions]) {
             return methods[methodOrOptions].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof methodOrOptions === 'object' || !methodOrOptions) {
