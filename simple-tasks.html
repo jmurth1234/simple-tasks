@@ -1,5 +1,5 @@
 <head>
-    <title>Learning Meteor by means of easy tutorial</title>
+    <title>Simple Tasks</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 </head>
 
@@ -20,33 +20,38 @@
                 {{else}}
                     <li><a class="modal-trigger" href="#login-modal">Login</a></li>
                 {{/if}}
-                <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i
-                        class="mdi-navigation-more-vert"></i></a></li>
-            </ul>
-
-
-            <ul class="dropdown-content" id="dropdown1" >
-                <li><a class="black-text" href="#!">Settings</a></li>
-                <li     class="divider"></li>
-                <li><a class="black-text" href="#!">About</a></li>
             </ul>
         </div>
     </nav>
 </header>
 
 <!-- Modal Structure -->
-<div id="login-modal" class="modal" >
+<div id="login-modal" class="modal">
     {{> login}}
+</div>
+
+<!-- Modal Structure -->
+<div id="about-modal" class="modal">
+    <div class="modal-content center-block">
+        <h4>About Simple Tasks</h4>
+        <p>Simple Tasks is a lightweight task management application for the web. It's completely free, uses AES encryption for tasks, and is open source!</p>
+    </div>
+    <div class="modal-footer">
+        <a target="_blank" href="https://github.com/rymate1234/simple-tasks" class="modal-action modal-close waves-effect waves-green btn-flat ">View Code on Github!</a>
+    </div>
 </div>
 
 
 <div class="side-nav fixed" id="mobile-demo" style="  min-height: 100%;">
     <div class="sidebar">
         <ul>
-            <li><a href="">All Tasks</a></li>
-            <li><a href="">Unsorted</a></li>
-            <li><a href="">Placeholder</a></li>
-            <li><a href="">Another Placeholder</a></li>
+            <li><a id="all" class="tag-sidebar" href="#!">All Tasks</a></li>
+            <li><a id="none" class="tag-sidebar" href="#!">Unsorted</a></li>
+            <li class="divider"></li>
+            <p style="text-transform: uppercase; font-weight: bold; padding: 0px 30px;" href="">Your Tags</p>
+            {{#each tags}}
+                {{> tag}}
+            {{/each}}
         </ul>
     </div>
 
@@ -57,9 +62,8 @@
         {{#if currentUser}}
             <div class="section">
                 <div class="row">
-                    <div class="col s12">
-                        {{> task_input}}
-                    </div>
+                    {{> task_input}}
+
                     <div class="col s6"> Tasks to complete: {{incompleteCount}}
                     </div>
                     <div class="col s6">
@@ -82,6 +86,9 @@
                 <p class="flow-text">Please login or sign up in order to start using this application!</p>
 
                 <a class="flow-text modal-trigger blue btn" href="#login-modal">Login</a>
+                <br/>
+                <br/>
+                <a class="modal-trigger btn-flat" href="#about-modal">About</a>
             </div>
         {{/if}}
     </div>
@@ -94,7 +101,9 @@
         <div class="row">
             <div class="col s11">
                 <input type="checkbox" checked="{{checked}}" id="{{_id}}" class="toggle-checked"/>
-                <label class="item {{#if checked}}checked{{/if}}" for="{{_id}}">{{text}}</label>
+                <label class="item" for="{{_id}}">
+                    <span class="z-depth-1 private">{{getTag tag}}</span> <span class="{{#if checked}}checked{{/if}}"> {{decrypt text}}</span>
+                </label>
             </div>
 
             <div class="col s1">
@@ -123,7 +132,41 @@
 </template>
 
 <template name="task_input">
-    <form class="new-task">
-        <input class="task-input" type="text" name="text" placeholder="Type to add new tasks"/>
-    </form>
+    <ul class="collapsible popout" data-collapsible="accordion">xc
+        <li>
+            <div class="collapsible-header"><i class="mdi-content-add"></i>Create Task</div>
+            <div class="collapsible-body">
+                <div class="new-task">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <label for="task-input">Type to add new task</label>
+                            <input id="task-input" class="task-input" type="text" name="text"/>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s6">
+                            <select id="tag-option" class="browser-default">
+                                <option value="none">No Tag</option>
+                                {{#each tags}}
+                                    <option value="{{_id}}">{{text}}</option>
+                                {{/each}}
+                            </select >
+
+                            <input id="tag-input" placeholder="Select or add a new tag" class="tag-input" type="text" name="text"/>
+
+                        </div>
+
+                        <div class="col right">
+                            <button class="btn blue waves-effect waves-light align-right" id="submit-btn">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</template>
+
+<template name="tag">
+    <li><a class="tag-sidebar" id="{{_id}}" href="#!">{{text}}</a></li>
 </template>

@@ -1,20 +1,49 @@
 // simple-todos.js
 
 Tasks = new Mongo.Collection("tasks");
+Tags = new Mongo.Collection("tags");
 
 if (Meteor.isClient) {
     Meteor.subscribe("tasks");
+    Meteor.subscribe("tags");
     // This code only runs on the client
+
+    var tags;
+    function getTags() {
+        if (!tags) {
+            tags = Tags.find({}, {sort: {createdAt: 1}});
+        }
+        console.log(tags);
+        return tags;
+    }
+
     Template.body.helpers({
         tasks: function () {
-            if (Session.get("hideCompleted")) {
-                // If hide completed is checked, filter tasks
-                return Tasks.find({checked: {$ne: true}}, {sort: {createdAt: -1}});
+            var tag = Session.get("currentTag");
+            if (tag === undefined)
+                tag = "all";
+
+            if (tag === "all") {
+                if (Session.get("hideCompleted")) {
+                    // If hide completed is checked, filter tasks
+                    var tasks = Tasks.find({checked: {$ne: true}}, {sort: {createdAt: -1}});
+                } else {
+                    // Otherwise, return all of the tasks
+                    var tasks = Tasks.find({}, {sort: {createdAt: -1}});
+                }
             } else {
-                // Otherwise, return all of the tasks
-                return Tasks.find({}, {sort: {createdAt: -1}});
+                if (Session.get("hideCompleted")) {
+                    // If hide completed is checked, filter tasks
+                    var tasks = Tasks.find({checked: {$ne: true}, tag: tag}, {sort: {createdAt: -1}});
+                } else {
+                    // Otherwise, return all of the tasks
+                    var tasks = Tasks.find({tag: tag}, {sort: {createdAt: -1}});
+                }
             }
+
+            return tasks;
         },
+        tags: getTags(),
 
         hideCompleted: function () {
             return Session.get("hideCompleted");
@@ -49,23 +78,61 @@ if (Meteor.isClient) {
         "click #logout": function (event) {
             Meteor.logout();
             location.hash = "";
+        },
+
+        "click .tag-sidebar": function (event) {
+            var id = event.currentTarget.id;
+            Session.set("currentTag", id);
         }
+
     });
 
     Template.task_input.events({
-        "submit .new-task": function (event) {
+        "click #submit-btn": function (event) {
             // This function is called when the new task form is submitted
 
-            var text = event.target.text.value;
+            var text = $("#task-input").val();
 
-            Meteor.call("addTask", text);
+            var tag = $('#tag-option').val();
+
+            var find = Tags.find({_id: tag});
+            var find2 = Tags.find({text: $('#tag-input').val()});
+            var fetch = find.fetch();
+            var fetch2 = find2.fetch();
+            if ((fetch[0] === undefined) && (fetch2[0] === undefined)) {
+                Meteor.call("addTag", $('#tag-input').val(), function(err, data) {
+                    if (err)
+                        console.log(err);
+
+                    var find = Tags.find({text: $('#tag-input').val()});
+                    var fetch = find.fetch();
+                    tag = fetch[0]._id;
+                });
+            }
+
+            var enc_text = CryptoJS.AES.encrypt(text, Session.get("enc_key"));
+
+            Meteor.call("addTask", enc_text.toString(), tag);
 
             // Clear form
-            event.target.text.value = "";
+            $("#task-input").blur();
+            $("#task-input").val('');
+            $("#tag-option").val('');
+        },
 
-            // Prevent default form submit
-            return false;
+        "change #tag-option": function (event) {
+            $('#tag-input').val($("#tag-option").find(":selected").text());
         }
+    });
+
+    Template.task_input.onRendered(function () {
+        $('.collapsible').collapsible({
+            accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+        });
+    });
+
+    Template.task_input.helpers({
+        tags: getTags()
     });
 
     // In the client code, below everything else
@@ -77,6 +144,22 @@ if (Meteor.isClient) {
         "click .delete": function () {
             Meteor.call("deleteTask", this._id);
         }
+    });
+
+    Template.task.helpers({
+        decrypt: function(text) {
+            return CryptoJS.AES.decrypt(text, Session.get("enc_key")).toString(CryptoJS.enc.Utf8);
+        },
+        getTag: function (tag) {
+            var find = Tags.find({_id: tag});
+            var fetch = find.fetch();
+            if (fetch[0] !== undefined) {
+                return fetch[0].text;
+            } else {
+                return "None";
+            }
+        }
+
     });
 
     Template.login.events({
@@ -95,6 +178,7 @@ if (Meteor.isClient) {
                 if (err) {
                     $().toast('Login failed!', 4000);
                 } else {
+                    Session.setAuth("enc_key", CryptoJS.SHA256(username + password).toString());
                     $().toast('Login complete!', 4000);
 
                 }
@@ -123,12 +207,12 @@ if (Meteor.isClient) {
             return false;
         }
     });
-
 }
 
 // At the bottom of simple-todos.js, outside of the client-only block
 Meteor.methods({
-    addTask: function (text) {
+    // task methods
+    addTask: function (text, tag) {
         // Make sure the user is logged in before inserting a task
         if (! Meteor.userId()) {
             throw new Meteor.Error("not-authorized");
@@ -136,6 +220,7 @@ Meteor.methods({
 
         Tasks.insert({
             text: text,
+            tag: tag,
             createdAt: new Date(),
             owner: Meteor.userId()
         });
@@ -145,6 +230,22 @@ Meteor.methods({
     },
     setChecked: function (taskId, setChecked) {
         Tasks.update(taskId, { $set: { checked: setChecked} });
+    },
+
+    // tag methods
+    addTag: function (text) {
+        // Make sure the user is logged in before inserting a task
+        if (! Meteor.userId()) {
+            throw new Meteor.Error("not-authorized");
+        }
+
+        var tag = Tags.insert({
+            text: text,
+            createdAt: new Date(),
+            owner: Meteor.userId()
+        });
+
+        return tag._id;
     }
 });
 
@@ -154,5 +255,16 @@ if (Meteor.isServer) {
     Meteor.publish("tasks", function () {
         return Tasks.find({owner: this.userId});
     });
+
+    Meteor.publish("tags", function () {
+        return Tags.find({owner: this.userId});
+    });
+
 }
 
+
+Meteor.users.deny({
+    update: function() {
+        return true;
+    }
+});

@@ -6,6 +6,9 @@
 
 meteor-platform
 jquery
-rymate1234:materialize
 accounts-ui
 accounts-password
+rymate1234:materialize
+u2622:persistent-session
+jparker:crypto-aes
+jparker:crypto-sha256
