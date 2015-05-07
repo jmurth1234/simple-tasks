@@ -70,7 +70,7 @@ if (Meteor.isClient) {
 
     Template.body.events({
         "change #hideCompleted": function (event) {
-            Session.set("hideCompleted", event.target.checked);
+            Session.setTemp("hideCompleted", event.target.checked);
         },
 
         "click #logout": function (event) {
@@ -80,7 +80,7 @@ if (Meteor.isClient) {
 
         "click .tag-sidebar": function (event) {
             var id = event.currentTarget.id;
-            Session.set("currentTag", id);
+            Session.setTemp("currentTag", id);
         }
 
     });
@@ -97,15 +97,17 @@ if (Meteor.isClient) {
             var find2 = Tags.find({text: $('#tag-input').val()});
             var fetch = find.fetch();
             var fetch2 = find2.fetch();
-            if ((fetch[0] === undefined) && (fetch2[0] === undefined)) {
-                Meteor.call("addTag", $('#tag-input').val(), function(err, data) {
-                    if (err)
-                        console.log(err);
+            if (tag != "none") {
+                if ((fetch[0] === undefined) && (fetch2[0] === undefined)) {
+                    Meteor.call("addTag", $('#tag-input').val(), function (err, data) {
+                        if (err)
+                            console.log(err);
 
-                    var find = Tags.find({text: $('#tag-input').val()});
-                    var fetch = find.fetch();
-                    tag = fetch[0]._id;
-                });
+                        var find = Tags.find({text: $('#tag-input').val()});
+                        var fetch = find.fetch();
+                        tag = fetch[0]._id;
+                    });
+                }
             }
 
             var enc_text = CryptoJS.AES.encrypt(text, Session.get("enc_key"));
@@ -199,6 +201,7 @@ if (Meteor.isClient) {
                     console.log(err);
                     $().toast('Registration failed!', 4000);
                 } else {
+                    Session.setAuth("enc_key", CryptoJS.SHA256(username + password).toString());
                     $().toast('Registration complete!', 4000);
                 }
             });

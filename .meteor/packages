@@ -9,6 +9,6 @@ jquery
 accounts-ui
 accounts-password
 rymate1234:materialize
-u2622:persistent-session
+u2622:persistent-session@=0.3.3
 jparker:crypto-aes
 jparker:crypto-sha256
