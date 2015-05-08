@@ -1,11 +1,21 @@
 // simple-todos.js
 
-Tasks = new Mongo.Collection("tasks");
-Tags = new Mongo.Collection("tags");
+DDPConnection = (Meteor.isClient) ? DDP.connect('https://cloud.rymate.co.uk/') : {};
+
+if(Meteor.isClient) {
+    // set the new DDP connection to all internal packages, which require one
+    Meteor.connection = DDPConnection;
+    Accounts.connection = Meteor.connection;
+    Meteor.users = new Mongo.Collection('users');
+    Meteor.connection.subscribe('users');
+}
+
+Tasks = new Mongo.Collection("tasks", DDPConnection);
+Tags = new Mongo.Collection("tags", DDPConnection);
 
 if (Meteor.isClient) {
-    Meteor.subscribe("tasks");
-    Meteor.subscribe("tags");
+    DDPConnection.subscribe("tasks");
+    DDPConnection.subscribe("tags");
     // This code only runs on the client
 
     var tags;
